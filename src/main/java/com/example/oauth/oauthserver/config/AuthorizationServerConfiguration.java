@@ -8,6 +8,8 @@
  */
 package com.example.oauth.oauthserver.config;
 
+import javax.sql.DataSource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +19,9 @@ import org.springframework.security.oauth2.config.annotation.configurers.ClientD
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 
 /**
@@ -35,13 +40,31 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 
 	@Value("${access_token.validity_period:3600}")
 	int accessTokenValiditySeconds = 3600;
+	
+	@Value("signing-key:oui214hmui23o4hm1pui3o2hp4m1o3h2m1o43")
+	private String signinKey;
 
 	@Autowired
 	private AuthenticationManager authenticationManager;
 
+	@Autowired
+	private DataSource datasource;
+	
 	@Bean
 	public JwtAccessTokenConverter accessTokenConverter() {
-		return new JwtAccessTokenConverter();
+		final JwtAccessTokenConverter accessTokenConveter = new JwtAccessTokenConverter();
+		accessTokenConveter.setSigningKey(signinKey);
+		return accessTokenConveter;
+	}
+//	
+//	@Bean
+//	public TokenStore tokenStore(){
+//		return new JwtTokenStore(accessTokenConverter());
+//	}
+	
+	@Bean
+	public TokenStore tokenStore(){
+		return new JdbcTokenStore(datasource);
 	}
 
 	/*
@@ -54,10 +77,17 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 	 * AuthorizationServerEndpointsConfigurer)
 	 */
 	@Override
-	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-		endpoints.authenticationManager(this.authenticationManager).accessTokenConverter(accessTokenConverter());
+	public void configure(AuthorizationServerEndpointsConfigurer configurer) throws Exception {
+		configurer.tokenStore(tokenStore())
+				 .authenticationManager(authenticationManager);
 	}
 	
+	@Override
+	public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
+		
+		security.tokenKeyAccess("permitAll()")
+				.checkTokenAccess("isAuthenticated()");
+	}
 	/* (non-Javadoc)
 	 * @see org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter#configure(org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer)
 	 */
@@ -77,6 +107,11 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 				.scopes("read","write")
 				.resourceIds(resourceId)
 				.accessTokenValiditySeconds(accessTokenValiditySeconds)
-				.secret("secret");
+				.secret("secret")
+			.and()
+			  .withClient("user")
+	          .secret("user")
+	          .authorizedGrantTypes("authorization_code", "refresh_token",
+	              "password").scopes("openid");
 	}
 }
