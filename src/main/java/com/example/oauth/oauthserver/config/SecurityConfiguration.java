@@ -8,68 +8,77 @@
  */
 package com.example.oauth.oauthserver.config;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.web.csrf.CsrfFilter;
-import org.springframework.security.web.csrf.CsrfTokenRepository;
-import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.StandardPasswordEncoder;
 
+import com.example.oauth.oauthserver.service.OauthUserDetailService;
 
-/** 
- * ClassName: SecurityConfiguration  
+/**
+ * ClassName: SecurityConfiguration
  * 
- * @author jet 
+ * @author jet
  * @version Configuration Framework 1.0
- * @since JDK 1.7 
+ * @since JDK 1.7
  */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-	
-	
-//	@Override
-//	public void configure(AuthenticationManagerBuilder auth) throws Exception {
-//		auth.inMemoryAuthentication().withUser("admin").password("admin").roles("ADMIN","USER")
-//					.and().withUser("user").password("user").roles("USER");
-//	}
-	
-	
+	@Autowired
+	OauthUserDetailService userDetailService;
+
+	@Autowired
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new StandardPasswordEncoder();
+	}
+
+	// @Override
+	// public void configure(AuthenticationManagerBuilder auth) throws Exception
+	// {
+	// auth.inMemoryAuthentication().withUser("admin").password("admin").roles("ADMIN","USER")
+	// .and().withUser("user").password("user").roles("USER");
+	// }
+
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-		auth.inMemoryAuthentication().withUser("admin").password("admin").roles("ADMIN","USER")
-		.and().withUser("user").password("user").roles("CLIENT","TRUSTED_CLIENT");
+		// auth.inMemoryAuthentication().withUser("admin").password("admin").roles("ADMIN","USER")
+		// .and().withUser("user").password("user").roles("CLIENT","TRUSTED_CLIENT");
+		auth.userDetailsService(userDetailService).passwordEncoder(passwordEncoder());
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter#configure(org.springframework.security.config.annotation.web.builders.HttpSecurity)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.springframework.security.config.annotation.web.configuration.
+	 * WebSecurityConfigurerAdapter#configure(org.springframework.security.
+	 * config.annotation.web.builders.HttpSecurity)
 	 */
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.csrf().disable()
-			.authorizeRequests()
-			.antMatchers("/","/home").permitAll()
-			.anyRequest().authenticated()
-			.and()
-			.formLogin()
-			.loginPage("/login2").permitAll()
-			.and()
-			.logout().permitAll()
-//			.and()
-//			.addFilterAfter(new CSRFAttributeFilter(), CsrfFilter.class)
-//			.csrf().csrfTokenRepository(csrfTokenRepository());
-			;
-		
+		http.csrf().disable().authorizeRequests()
+				.antMatchers("/", "/home").permitAll()
+				.antMatchers("/user/**").permitAll()
+				.anyRequest().authenticated()
+				.and().formLogin().loginPage("/login2").permitAll().and().logout().permitAll()
+		// .and()
+		// .addFilterAfter(new CSRFAttributeFilter(), CsrfFilter.class)
+		// .csrf().csrfTokenRepository(csrfTokenRepository());
+		;
+
 	}
 
-//	private CsrfTokenRepository csrfTokenRepository(){
-//		HttpSessionCsrfTokenRepository repository = new HttpSessionCsrfTokenRepository();
-//		repository.setHeaderName("X-XSRF-TOKEN");
-//		return repository;
-//	}
+	// private CsrfTokenRepository csrfTokenRepository(){
+	// HttpSessionCsrfTokenRepository repository = new
+	// HttpSessionCsrfTokenRepository();
+	// repository.setHeaderName("X-XSRF-TOKEN");
+	// return repository;
+	// }
 }
