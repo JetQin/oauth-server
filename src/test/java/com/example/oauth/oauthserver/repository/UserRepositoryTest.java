@@ -3,8 +3,8 @@ package com.example.oauth.oauthserver.repository;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.transaction.Transactional;
 
@@ -31,7 +31,7 @@ public class UserRepositoryTest {
 	public void testSaveUser(){
 		Role role = new Role();
 		role.setRoleName("USER");
-		Set<Role> roles = new HashSet<Role>();
+		List<Role> roles = new ArrayList<Role>();
 		roles.add(role);
 		
 		User user = new User();

@@ -9,6 +9,7 @@
 package com.example.oauth.oauthserver.config;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
@@ -37,5 +38,11 @@ public class OauthWebConfiguration extends WebMvcConfigurerAdapter {
 		registry.addViewController("/hello").setViewName("hello");
 		registry.addViewController("/login").setViewName("login");
 		registry.addViewController("/login2").setViewName("login2");
+	}
+	
+	@Override
+	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+		//registry.addResourceHandler("/resources/**").addResourceLocations("classpath:/resources/");
+		registry.addResourceHandler("/app/**").addResourceLocations("classpath:/app/dist");
 	}
 }
