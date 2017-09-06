@@ -1,7 +1,7 @@
 package com.example.oauth.oauthserver.domain;
 
 import java.io.Serializable;
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,11 +15,9 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 @Entity
 @Table(name = "ROLE")
-@EqualsAndHashCode
 public @Data class Role implements Serializable {
 
 	/**
@@ -30,7 +28,7 @@ public @Data class Role implements Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	@Column(name = "ROLE_ID")
-	private Integer roleId;
+	private Long roleId;
 
 	@Column(name = "ROLE_NAME")
 	private String roleName;
@@ -40,7 +38,7 @@ public @Data class Role implements Serializable {
 
 	@JsonIgnore
 	@ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
-	private Set<User> users;
+	private List<User> users;
 
 	public String toString() {
 		return String.format("roleId:%d,roleName:%s,roleDescription:%s", roleId, roleName, roleDescription);

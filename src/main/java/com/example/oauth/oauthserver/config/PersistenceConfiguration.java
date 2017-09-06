@@ -16,15 +16,16 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.core.env.Environment;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -36,7 +37,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", transactionManagerRef = "transactionManager", basePackages = "com.example.oauth.oauthserver.repository")
+@EnableAspectJAutoProxy
+//@EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", transactionManagerRef = "transactionManager", basePackages = "com.example.oauth.oauthserver.repository")
 public class PersistenceConfiguration {
 
 	private static final String DOMAIN_PACKAGE = "com.example.oauth.oauthserver.domain";
@@ -66,10 +68,6 @@ public class PersistenceConfiguration {
 	public DataSource dataSource() {
 
 		final DriverManagerDataSource dataSource = new DriverManagerDataSource();
-		// dataSource.setDriverClassName(env.getProperty("jdbc.driverClassName"));
-		// dataSource.setUrl(env.getProperty("jdbc.url"));
-		// dataSource.setUsername(env.getProperty("jdbc.user"));
-		// dataSource.setPassword(env.getProperty("jdbc.pass"));
 		dataSource.setDriverClassName(env.getProperty("spring.datasource.driver-class-name"));
 		dataSource.setUrl(env.getProperty("spring.datasource.url"));
 		dataSource.setUsername(env.getProperty("spring.datasource.username"));
@@ -78,24 +76,25 @@ public class PersistenceConfiguration {
 	}
 
 	@Bean
-	public JpaTransactionManager transactionManager(EntityManagerFactory emf) {
-		return new JpaTransactionManager(emf);
+	public PlatformTransactionManager transactionManager(EntityManagerFactory emf) {
+		JpaTransactionManager transactionManager = new JpaTransactionManager();
+		transactionManager.setEntityManagerFactory(emf);
+		return transactionManager;
 	}
 
 	@Bean
-	public JpaVendorAdapter jpaVendorAdapter() {
-		HibernateJpaVendorAdapter jpaVendorAdapter = new HibernateJpaVendorAdapter();
-		jpaVendorAdapter.setDatabase(Database.MYSQL);
-		jpaVendorAdapter.setGenerateDdl(true);
-		return jpaVendorAdapter;
+	public PersistenceExceptionTranslationPostProcessor exceptionTranslation() {
+		return new PersistenceExceptionTranslationPostProcessor();
 	}
 
 	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean lemfb = new LocalContainerEntityManagerFactoryBean();
 		lemfb.setDataSource(dataSource());
-		lemfb.setJpaVendorAdapter(jpaVendorAdapter());
 		lemfb.setPackagesToScan(DOMAIN_PACKAGE);
+
+		JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+		lemfb.setJpaVendorAdapter(vendorAdapter);
 		lemfb.setLoadTimeWeaver(new InstrumentationLoadTimeWeaver());
 		lemfb.setJpaProperties(hibernateProperties());
 		return lemfb;
@@ -103,8 +102,6 @@ public class PersistenceConfiguration {
 
 	private Properties hibernateProperties() {
 		Properties properties = new Properties();
-		properties.put("hibernate.dialect", env.getProperty("spring.jpa.database-platform"));
-//		properties.put("hibernate.enable_lazy_load_no_trans", "true");
 		properties.setProperty("hibernate.hbm2ddl.auto", env.getProperty("spring.jpa.hibernate.ddl-auto"));
 		return properties;
 	}

@@ -1,7 +1,7 @@
 package com.example.oauth.oauthserver.domain;
 
 import java.io.Serializable;
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -18,11 +18,9 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 @Entity
 @Table(name = "USER")
-@EqualsAndHashCode
 public @Data class User implements Serializable {
 
 	/**
@@ -33,7 +31,7 @@ public @Data class User implements Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	@Column(name = "USER_ID")
-	private Integer userId;
+	private Long userId;
 
 	@Column(name = "USER_NAME")
 	private String username;
@@ -54,14 +52,14 @@ public @Data class User implements Serializable {
 	private String resetPasswordKey;
 
 	@JsonIgnore
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinTable(name = "USER_ROLE",
 		joinColumns = @JoinColumn(name = "USER_ID"), 
 		inverseJoinColumns = @JoinColumn(name = "ROLE_ID"))
-	private Set<Role> roles;
+	private List<Role> roles;
 
 	public String toString() {
-		return String.format("userId:%d,userName:%s,email:%s,activated:%s", userId, username, email, activated);
+		return String.format("User[userId:%d,userName:%s,email:%s,activated:%s]", userId, username, email, activated);
 	}
 
 }

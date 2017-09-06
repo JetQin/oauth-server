@@ -1,7 +1,10 @@
 package com.example.oauth.oauthserver.service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,12 +36,13 @@ public class OauthUserDetailService implements UserDetailsService {
 			LOGGER.debug("user not found with the provided username");
 			return null;
 		}
-		Set<Role> roles = user.getRoles();
+		List<Role> roles = user.getRoles();
 		Set<GrantedAuthority> authorities = getAuthorities(roles);
 		return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),authorities);
 	}
 
-	private Set<GrantedAuthority> getAuthorities(Set<Role> roles) {
+	@Transactional
+	private Set<GrantedAuthority> getAuthorities(List<Role> roles) {
 		Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
 		for (Role role : roles) {
 			GrantedAuthority grantedAuthority = new SimpleGrantedAuthority(role.getRoleName());
