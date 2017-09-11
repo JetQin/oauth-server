@@ -37,12 +37,23 @@ public class OauthWebConfiguration extends WebMvcConfigurerAdapter {
 		registry.addViewController("/").setViewName("home");
 		registry.addViewController("/hello").setViewName("hello");
 		registry.addViewController("/login").setViewName("login");
-		registry.addViewController("/login2").setViewName("login2");
+		registry.addViewController("/signin").setViewName("signin");
 	}
-	
+
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		//registry.addResourceHandler("/resources/**").addResourceLocations("classpath:/resources/");
-		registry.addResourceHandler("/app/**").addResourceLocations("classpath:/app/dist");
+		// registry.addResourceHandler("/").addResourceLocations("classpath:/app/dist/");
+		// registry.addResourceHandler("/**").addResourceLocations("classpath:/app/dist/");
+		registry.addResourceHandler("/app/**").addResourceLocations("classpath:/app/dist/");
 	}
+
+	// @Bean
+	// public InternalResourceViewResolver viewResolver(){
+	// InternalResourceViewResolver resolver = new
+	// InternalResourceViewResolver();
+	// resolver.setPrefix("/app/dist/");
+	// resolver.setSuffix(".html");
+	// return resolver;
+	// }
+
 }

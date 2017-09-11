@@ -11,6 +11,7 @@ package com.example.oauth.oauthserver.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -49,8 +50,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-		// auth.inMemoryAuthentication().withUser("admin").password("admin").roles("ADMIN","USER")
-		// .and().withUser("user").password("user").roles("CLIENT","TRUSTED_CLIENT");
 		auth.userDetailsService(userDetailService).passwordEncoder(passwordEncoder());
 	}
 
@@ -65,16 +64,24 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		http.csrf().disable().authorizeRequests()
 				.antMatchers("/", "/home").permitAll()
+				.antMatchers("/oauth/**").permitAll()
 				.antMatchers("/user/**").permitAll()
 				.antMatchers("/perm/**").permitAll()
 				.antMatchers("/role/**").permitAll()
 				.anyRequest().authenticated()
-				.and().formLogin().loginPage("/login2").permitAll().and().logout().permitAll()
+				.and()
+				.formLogin().loginPage("/login").permitAll()
+				.defaultSuccessUrl("/hello")
+				.and()
+				.logout().logoutSuccessUrl("/login").permitAll()
 		// .and()
 		// .addFilterAfter(new CSRFAttributeFilter(), CsrfFilter.class)
 		// .csrf().csrfTokenRepository(csrfTokenRepository());
 		;
 
+//		http.csrf().disable().authorizeRequests()
+//			.antMatchers(HttpMethod.GET).permitAll()
+//			.antMatchers(HttpMethod.POST).permitAll();
 	}
 
 	// private CsrfTokenRepository csrfTokenRepository(){

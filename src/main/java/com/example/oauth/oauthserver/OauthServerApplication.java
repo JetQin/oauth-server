@@ -11,6 +11,24 @@ import com.example.oauth.oauthserver.config.PersistenceConfiguration;
 @Import(value={PersistenceConfiguration.class})
 public class OauthServerApplication  {
 
+//	@Autowired
+//    private ApplicationContext context;
+//
+//    @Bean
+//    public ServletRegistrationBean restApi() {
+//        XmlWebApplicationContext applicationContext = new XmlWebApplicationContext();
+//        applicationContext.setParent(context);
+//        applicationContext.setConfigLocation("classpath:/META-INF/rest.xml");
+//
+//        DispatcherServlet dispatcherServlet = new DispatcherServlet();
+//        dispatcherServlet.setApplicationContext(applicationContext);
+//
+//        ServletRegistrationBean servletRegistrationBean = new ServletRegistrationBean(dispatcherServlet, "/rest/*");
+//        servletRegistrationBean.setName("restApi");
+//
+//        return servletRegistrationBean;
+//    }
+    
 	public static void main(String[] args) {
 		SpringApplication.run(OauthServerApplication.class, args);
 	}
